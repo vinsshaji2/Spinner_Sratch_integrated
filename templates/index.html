@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin & Win - Goethe-Zentrum</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>🎯 Spin & Win Your Discount! 🎯</h1>
+
+<div id="wheelContainer">
+    <div id="pointer">🔻</div>
+    <canvas id="wheelCanvas" width="550" height="550"></canvas>
+</div>
+
+<button id="spinBtn">SPIN NOW</button>
+
+<div id="result"></div>
+
+<div id="popup" class="popup hidden">
+    <div class="popup-box">
+        <h2 id="popupText"></h2>
+        <p id="popupDetails"></p>
+        <button onclick="closePopup()">✅ Send to WhatsApp</button>
+    </div>
+</div>
+
+<script>
+// Pre-load offers on page load
+fetch("/spin").then(r=>r.json()).then(data=>{
+    window.dynamicOffers = data.offers;
+});
+</script>
+
+<script src="/static/wheel.js"></script>
+</body>
+</html>

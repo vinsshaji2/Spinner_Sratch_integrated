@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scratch & Win - Goethe-Zentrum</title>
+    <link rel="stylesheet" href="/static/scratch.css">
+</head>
+<body>
+
+<h1>🎁 Scratch & Win Your Offer! 🎁</h1>
+
+<div class="scratch-container">
+    <canvas id="scratchCanvas"></canvas>
+    <div id="rewardText">???</div>
+</div>
+
+<div id="instruction">👆 Scratch to reveal your offer!</div>
+
+<div id="popup" class="popup hidden">
+    <div class="popup-box">
+        <h2>🎉 Congratulations!</h2>
+        <p id="popupText"></p>
+        <button onclick="sendToWhatsApp()">✅ Send to WhatsApp</button>
+    </div>
+</div>
+
+<script src="/static/scratch.js"></script>
+</body>
+</html>
