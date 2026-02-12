@@ -185,6 +185,8 @@ function showWinPopup(text) {
 
     // Save win in browser session
     sessionStorage.setItem("hasSpun", "true");
+    sessionStorage.setItem("hasScratched", "true");
+    sessionStorage.setItem("scratchReward", text);
     sessionStorage.setItem("winText", text);
     sessionStorage.setItem("module", selectedModule);
     sessionStorage.setItem("basePrice", basePrice);

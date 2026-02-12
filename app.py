@@ -120,7 +120,7 @@ def spin():
         "13% Discount",
         "15% Discount",
         "Next Registration 50% Discount",
-        "Registration for ₹1800"
+        "Registration for ₹1800",
         "Registration for ₹1700"
     ]
 
@@ -168,7 +168,7 @@ def scratch_reveal():
         "13% Discount",
         "15% Discount",
         "Next Registration 50% Discount",
-        "Registration for ₹1800"
+        "Registration for ₹1800",
         "Registration for ₹1700"
     ]
 
