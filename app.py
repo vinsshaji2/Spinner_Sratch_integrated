@@ -14,13 +14,22 @@ scope = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
-print(f"Service Account Email: {creds.service_account_email}")
-client = gspread.authorize(creds)
+try:
+    creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+    print(f"Service Account Email: {creds.service_account_email}")
+    client = gspread.authorize(creds)
 
-# TODO: Update this with your Google Sheet ID
-SHEET_ID = "1hpkKB_wtU38MXC-eXWOCg0J9CSBaxuOvJnPAqEpMdzQ"
-spreadsheet = client.open_by_key(SHEET_ID)
+    # TODO: Update this with your Google Sheet ID
+    SHEET_ID = "1hpkKB_wtU38MXC-eXWOCg0J9CSBaxuOvJnPAqEpMdzQ"
+    spreadsheet = client.open_by_key(SHEET_ID)
+    print(f"Successfully connected to Google Sheet: {spreadsheet.title}")
+except FileNotFoundError:
+    print("ERROR: service_account.json not found!")
+    print("Please add your Google Sheets service account credentials file.")
+    spreadsheet = None
+except Exception as e:
+    print(f"ERROR connecting to Google Sheets: {e}")
+    spreadsheet = None
 
 
 # ========================================
@@ -36,40 +45,80 @@ def home():
 @app.route("/check_email", methods=["POST"])
 def check_email():
     """Check if email exists in Google Sheets and store user info"""
-    data = request.json
-    email = data.get("email", "").strip().lower()
-    name = data.get("name", "").strip()
-    phone = data.get("phone", "").strip()
-    terms_accepted = data.get("terms_accepted", False)
+    try:
+        # Check if spreadsheet is connected
+        if spreadsheet is None:
+            print("ERROR: Google Sheets not connected")
+            return jsonify({"error": "Database connection error. Please contact support."}), 500
 
-    # Validate all fields
-    if not all([email, name, phone, terms_accepted]):
-        return jsonify({"error": "All fields are required and terms must be accepted"}), 400
+        data = request.json
+        email = data.get("email", "").strip().lower()
+        name = data.get("name", "").strip()
+        phone = data.get("phone", "").strip()
+        terms_accepted = data.get("terms_accepted", False)
 
-    TARGET_COLUMN = "EMAIL ID USED IN GOETHE-ZENTRUM TVM"
+        # Validate all fields
+        if not all([email, name, phone, terms_accepted]):
+            return jsonify({"error": "All fields are required and terms must be accepted"}), 400
 
-    for worksheet in spreadsheet.worksheets():
-        rows = worksheet.get_all_records()
+        TARGET_COLUMN = "EMAIL ID USED IN GOETHE-ZENTRUM TVM"
 
-        for row in rows:
-            cell_value = str(row.get(TARGET_COLUMN, "")).strip().lower()
+        for worksheet in spreadsheet.worksheets():
+            try:
+                # Get all values from the worksheet
+                all_values = worksheet.get_all_values()
 
-            if cell_value == email:
-                # Email found in spreadsheet - already registered
-                return jsonify({
-                    "found": True,
-                    "sheet": worksheet.title,
-                    "data": row
-                })
+                # Skip empty worksheets
+                if not all_values or len(all_values) < 2:
+                    continue
 
-    # Email not found - proceed with registration
-    # Store user data in session
-    session["email"] = email
-    session["name"] = name
-    session["phone"] = phone
-    session["verified"] = True
+                # Get header row
+                headers = all_values[0]
 
-    return jsonify({"found": False})
+                # Find the target column index
+                try:
+                    target_col_index = headers.index(TARGET_COLUMN)
+                except ValueError:
+                    # Column not found in this worksheet, skip it
+                    continue
+
+                # Check each row (skip header)
+                for row_values in all_values[1:]:
+                    # Make sure row has enough columns
+                    if len(row_values) > target_col_index:
+                        cell_value = str(row_values[target_col_index]).strip().lower()
+
+                        if cell_value == email:
+                            # Email found in spreadsheet - already registered
+                            # Create a dict of the row data
+                            row_data = {}
+                            for i, header in enumerate(headers):
+                                if i < len(row_values):
+                                    row_data[header] = row_values[i]
+
+                            return jsonify({
+                                "found": True,
+                                "sheet": worksheet.title,
+                                "data": row_data
+                            })
+
+            except Exception as worksheet_error:
+                # Log the error but continue checking other worksheets
+                print(f"Error processing worksheet {worksheet.title}: {worksheet_error}")
+                continue
+
+        # Email not found - proceed with registration
+        # Store user data in session
+        session["email"] = email
+        session["name"] = name
+        session["phone"] = phone
+        session["verified"] = True
+
+        return jsonify({"found": False})
+
+    except Exception as e:
+        print(f"Error in check_email: {e}")
+        return jsonify({"error": "An error occurred while checking email. Please try again."}), 500
 
 
 @app.route("/module", methods=["GET", "POST"])
