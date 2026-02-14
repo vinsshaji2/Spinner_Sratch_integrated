@@ -29,14 +29,22 @@ spreadsheet = client.open_by_key(SHEET_ID)
 
 @app.route("/")
 def home():
-    """Landing page - Email verification"""
+    """Landing page - Email verification with name and phone"""
     return render_template("index_email.html")
 
 
 @app.route("/check_email", methods=["POST"])
 def check_email():
-    """Check if email exists in Google Sheets"""
-    email = request.json.get("email", "").strip().lower()
+    """Check if email exists in Google Sheets and store user info"""
+    data = request.json
+    email = data.get("email", "").strip().lower()
+    name = data.get("name", "").strip()
+    phone = data.get("phone", "").strip()
+    terms_accepted = data.get("terms_accepted", False)
+
+    # Validate all fields
+    if not all([email, name, phone, terms_accepted]):
+        return jsonify({"error": "All fields are required and terms must be accepted"}), 400
 
     TARGET_COLUMN = "EMAIL ID USED IN GOETHE-ZENTRUM TVM"
 
@@ -47,16 +55,19 @@ def check_email():
             cell_value = str(row.get(TARGET_COLUMN, "")).strip().lower()
 
             if cell_value == email:
-                # Store email and user data in session
-                session["email"] = email
-                # session["user_data"] = row
-                session["verified"] = True
-
+                # Email found in spreadsheet - already registered
                 return jsonify({
                     "found": True,
                     "sheet": worksheet.title,
                     "data": row
                 })
+
+    # Email not found - proceed with registration
+    # Store user data in session
+    session["email"] = email
+    session["name"] = name
+    session["phone"] = phone
+    session["verified"] = True
 
     return jsonify({"found": False})
 
@@ -65,12 +76,12 @@ def check_email():
 def module_page():
     """Module selection page - requires email verification"""
     # Check if email is verified
-    if session.get("verified"):
+    if not session.get("verified"):
         print("Not verified!")
         return redirect("/")
 
     if request.method == "POST":
-        module = request.form.get("module").strip().lower()
+        module = request.form.get("module").strip()
         session["module"] = module
         return redirect("/choose-offer")
 
@@ -80,7 +91,7 @@ def module_page():
 @app.route("/choose-offer")
 def choose_offer():
     """Choose between Wheel or Scratch card"""
-    if session.get("verified") or not session.get("module"):
+    if not session.get("verified") or not session.get("module"):
         return redirect("/")
 
     return render_template("choose_offer.html")
@@ -89,7 +100,7 @@ def choose_offer():
 @app.route("/wheel")
 def wheel():
     """Spin wheel page"""
-    if session.get("verified") or not session.get("module"):
+    if not session.get("verified") or not session.get("module"):
         return redirect("/")
 
     return render_template("index.html")
@@ -98,7 +109,7 @@ def wheel():
 @app.route("/scratch")
 def scratch():
     """Scratch card page"""
-    if session.get("verified") or not session.get("module"):
+    if not session.get("verified") or not session.get("module"):
         return redirect("/")
 
     return render_template("scratch.html")
@@ -107,7 +118,7 @@ def scratch():
 @app.route("/spin")
 def spin():
     """API endpoint for wheel spin"""
-    if session.get("verified"):
+    if not session.get("verified"):
         return jsonify({"error": "Not authorized"}), 403
 
     module = session.get("module", "").lower()
@@ -148,14 +159,16 @@ def spin():
         "index": index,
         "module": module,
         "base_price": base_price,
-        "email": session.get("email")
+        "email": session.get("email"),
+        "name": session.get("name"),
+        "phone": session.get("phone")
     })
 
 
 @app.route("/scratch-reveal", methods=["POST"])
 def scratch_reveal():
     """API endpoint for scratch card reveal"""
-    if session.get("verified"):
+    if not session.get("verified"):
         return jsonify({"error": "Not authorized"}), 403
 
     module = session.get("module", "").lower()
@@ -195,7 +208,9 @@ def scratch_reveal():
         "reward": reward,
         "module": module,
         "base_price": base_price,
-        "email": session.get("email")
+        "email": session.get("email"),
+        "name": session.get("name"),
+        "phone": session.get("phone")
     })
 
 

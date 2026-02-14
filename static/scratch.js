@@ -14,6 +14,8 @@ let scratchedPercentage = 0;
 let selectedModule = "";
 let basePrice = 0;
 let userEmail = "";
+let userName = "";
+let userPhone = "";
 let rewardOffer = "";
 
 // Check if already scratched
@@ -22,6 +24,8 @@ if (sessionStorage.getItem("hasScratched")) {
     selectedModule = sessionStorage.getItem("module");
     basePrice = parseInt(sessionStorage.getItem("basePrice"));
     userEmail = sessionStorage.getItem("email") || "";
+    userName = sessionStorage.getItem("name") || "";
+    userPhone = sessionStorage.getItem("phone") || "";
 
     rewardText.textContent = rewardOffer;
     instruction.textContent = "You already scratched! Click below to send to WhatsApp.";
@@ -63,6 +67,8 @@ function initScratchCard() {
             selectedModule = data.module;
             basePrice = data.base_price;
             userEmail = data.email || "";
+            userName = data.name || "";
+            userPhone = data.phone || "";
 
             rewardText.textContent = rewardOffer;
         });
@@ -157,6 +163,8 @@ function revealComplete() {
     sessionStorage.setItem("module", selectedModule);
     sessionStorage.setItem("basePrice", basePrice);
     sessionStorage.setItem("email", userEmail);
+    sessionStorage.setItem("name", userName);
+    sessionStorage.setItem("phone", userPhone);
 
     // Show confetti
     createConfetti();
@@ -179,6 +187,8 @@ function sendToWhatsApp() {
     selectedModule = selectedModule || sessionStorage.getItem("module");
     basePrice = basePrice || parseInt(sessionStorage.getItem("basePrice"));
     userEmail = userEmail || sessionStorage.getItem("email") || "";
+    userName = userName || sessionStorage.getItem("name") || "";
+    userPhone = userPhone || sessionStorage.getItem("phone") || "";
 
     let msg = "";
     const percentMatch = rewardOffer.match(/^(\d+)% Discount$/);
@@ -189,19 +199,23 @@ function sendToWhatsApp() {
 
         msg =
             `🎉 Scratch & Win Result!\n\n` +
+            `Name: ${userName}\n` +
+            `Phone: ${userPhone}\n` +
+            `Email: ${userEmail}\n\n` +
             `Module: ${selectedModule}\n` +
             `Offer: ${rewardOffer}\n` +
             `Base Price: ₹${basePrice}\n` +
             `Final Amount: ₹${finalAmount}\n` +
             `(Saved ₹${basePrice - finalAmount}!)\n\n` +
-            `Email: ${userEmail}\n\n` +
             `I'd like to book this offer!`;
     } else {
         msg =
             `🎉 Scratch & Win Result!\n\n` +
-            `Module: ${selectedModule}\n` +
-            `Offer: ${rewardOffer}\n` +
+            `Name: ${userName}\n` +
+            `Phone: ${userPhone}\n` +
             `Email: ${userEmail}\n\n` +
+            `Module: ${selectedModule}\n` +
+            `Offer: ${rewardOffer}\n\n` +
             `I'd like to book this offer!`;
     }
 

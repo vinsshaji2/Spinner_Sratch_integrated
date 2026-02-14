@@ -11,6 +11,8 @@ let spinning = false;
 let basePrice = 0;
 let selectedModule = "";
 let userEmail = "";
+let userName = "";
+let userPhone = "";
 let lastWinText = "";
 
 // 🎨 Draw the wheel
@@ -135,6 +137,8 @@ document.getElementById("spinBtn").onclick = async () => {
     basePrice = data.base_price;
     selectedModule = data.module;
     userEmail = data.email || "";
+    userName = data.name || "";
+    userPhone = data.phone || "";
 
     spinTo(data.index);
 };
@@ -152,6 +156,8 @@ function loadWheel() {
         selectedModule = sessionStorage.getItem("module");
         basePrice = parseInt(sessionStorage.getItem("basePrice"));
         userEmail = sessionStorage.getItem("email") || "";
+        userName = sessionStorage.getItem("name") || "";
+        userPhone = sessionStorage.getItem("phone") || "";
 
         const spinBtn = document.getElementById("spinBtn");
         spinBtn.disabled = true;
@@ -173,6 +179,8 @@ function loadWheel() {
             basePrice = data.base_price;
             selectedModule = data.module;
             userEmail = data.email || "";
+            userName = data.name || "";
+            userPhone = data.phone || "";
             drawWheel();
         });
 }
@@ -191,6 +199,8 @@ function showWinPopup(text) {
     sessionStorage.setItem("module", selectedModule);
     sessionStorage.setItem("basePrice", basePrice);
     sessionStorage.setItem("email", userEmail);
+    sessionStorage.setItem("name", userName);
+    sessionStorage.setItem("phone", userPhone);
 
     document.getElementById("popupText").innerText = "🎉 You Won!";
 
@@ -208,6 +218,8 @@ function closePopup() {
     selectedModule = selectedModule || sessionStorage.getItem("module");
     basePrice = basePrice || parseInt(sessionStorage.getItem("basePrice"));
     userEmail = userEmail || sessionStorage.getItem("email") || "";
+    userName = userName || sessionStorage.getItem("name") || "";
+    userPhone = userPhone || sessionStorage.getItem("phone") || "";
 
     let msg = "";
     const percentMatch = lastWinText.match(/^(\d+)% Discount$/);
@@ -218,19 +230,23 @@ function closePopup() {
 
         msg =
             `🎉 Spin & Win Result!\n\n` +
+            `Name: ${userName}\n` +
+            `Phone: ${userPhone}\n` +
+            `Email: ${userEmail}\n\n` +
             `Module: ${selectedModule}\n` +
             `Offer: ${lastWinText}\n` +
             `Base Price: ₹${basePrice}\n` +
             `Final Amount: ₹${finalAmount}\n` +
             `(Saved ₹${basePrice - finalAmount}!)\n\n` +
-            `Email: ${userEmail}\n\n` +
             `I'd like to book this offer!`;
     } else {
         msg =
             `🎉 Spin & Win Result!\n\n` +
-            `Module: ${selectedModule}\n` +
-            `Offer: ${lastWinText}\n` +
+            `Name: ${userName}\n` +
+            `Phone: ${userPhone}\n` +
             `Email: ${userEmail}\n\n` +
+            `Module: ${selectedModule}\n` +
+            `Offer: ${lastWinText}\n\n` +
             `I'd like to book this offer!`;
     }
 

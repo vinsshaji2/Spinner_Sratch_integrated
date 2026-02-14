@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Goethe-Zentrum - Email Verification</title>
+    <title>Goethe-Zentrum - Registration</title>
     <style>
         * {
             margin: 0;
@@ -26,7 +26,7 @@
             padding: 40px;
             border-radius: 20px;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             text-align: center;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             animation: slideIn 0.6s ease;
@@ -60,10 +60,24 @@
             font-size: 14px;
         }
 
-        input {
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
             width: 100%;
             padding: 15px;
-            margin-top: 10px;
             border-radius: 10px;
             border: 2px solid #e0e0e0;
             outline: none;
@@ -71,9 +85,53 @@
             transition: all 0.3s ease;
         }
 
-        input:focus {
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .terms-container {
+            margin: 25px 0;
+            text-align: left;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="checkbox"] {
+            margin-top: 4px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .checkbox-label {
+            color: #333;
+            font-size: 14px;
+            line-height: 1.5;
+            cursor: pointer;
+        }
+
+        .terms-link {
+            color: #667eea;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .terms-link:hover {
+            color: #764ba2;
         }
 
         button {
@@ -151,6 +209,91 @@
             display: block;
         }
 
+        /* Terms Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.4s ease;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+
+        .modal h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .modal-content h3 {
+            color: #667eea;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .modal-content p,
+        .modal-content ul {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .modal-content ul {
+            padding-left: 20px;
+        }
+
+        .modal-content li {
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #ff0000;
+        }
+
+        .warning-text {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .warning-text.show {
+            display: block;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 30px 20px;
@@ -159,6 +302,11 @@
             h1 {
                 font-size: 24px;
             }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+            }
         }
     </style>
 </head>
@@ -166,21 +314,133 @@
 <div class="container">
     <div class="logo">🎓</div>
     <h1>Welcome to Goethe-Zentrum!</h1>
-    <p class="subtitle">Please verify your email to continue</p>
+    <p class="subtitle">Please complete your registration details</p>
 
-    <input id="email" type="email" placeholder="Enter your registered email" autocomplete="email" />
-    <button id="checkBtn" onclick="check()">Verify Email</button>
+    <form id="registrationForm">
+        <div class="form-group">
+            <label for="name">Full Name <span class="required">*</span></label>
+            <input id="name" type="text" placeholder="Enter your full name" autocomplete="name" required />
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone Number <span class="required">*</span></label>
+            <input id="phone" type="tel" placeholder="Enter your phone number" autocomplete="tel" required />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <input id="email" type="email" placeholder="Enter your email address" autocomplete="email" required />
+        </div>
+
+        <div class="terms-container">
+            <div class="checkbox-wrapper">
+                <input type="checkbox" id="termsCheckbox" required />
+                <label for="termsCheckbox" class="checkbox-label">
+                    I have read and agree to the <span class="terms-link" onclick="openTerms()">Terms and Conditions</span> <span class="required">*</span>
+                </label>
+            </div>
+            <div class="warning-text" id="termsWarning">
+                ⚠️ Please click on "Terms and Conditions" above to read them before accepting.
+            </div>
+        </div>
+
+        <button type="submit" id="checkBtn">Continue to Registration</button>
+    </form>
 
     <div class="spinner" id="spinner"></div>
     <div id="result"></div>
 </div>
 
+<!-- Terms Modal -->
+<div id="termsModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeTerms()">&times;</span>
+        <h2>📌 Terms and Conditions</h2>
+
+        <h3>Cancellation Policy</h3>
+        <p>Once your email is registered and your seat is reserved, <strong>cancellations will not be accepted</strong>. On the day of registration, an official email will be sent to Goethe from our team.</p>
+        <p>⚠️ Please only submit the form if you are genuinely interested in appearing for the exam. Make sure you have fully decided before submitting to ensure a smooth process for all candidates.</p>
+
+        <h3>Payment Policy</h3>
+        <p>💳 Payment to Deutsch Zeit is required once you receive the confirmation email, even if you later decide not to attend the exam.</p>
+        <p>✅ No advance payment is needed. You are required to pay <strong>₹1500/₹2000</strong> (for different modules or Sprechen combos) only after receiving your official confirmation email.</p>
+
+        <h3>Account & Registration Policy</h3>
+        <p>By registering through Deutsch Zeit, you agree and confirm that:</p>
+        <ul>
+            <li>You have no objection to sharing your email credentials (email ID and password) with Deutsch Zeit solely for the purpose of exam registration with the Goethe-Institut.</li>
+            <li>You understand and acknowledge that Deutsch Zeit handles the registration process responsibly and maintains strict confidentiality regarding your shared information.</li>
+            <li>You are fully aware of the ₹1500/2000 Deutsch Zeit service fee and have no concerns regarding this payment. You understand that this amount is paid solely for the service provided by Deutsch Zeit.</li>
+        </ul>
+
+        <h3>Exam Fee Structure:</h3>
+        <ul>
+            <li><strong>Per Module Exam Fee:</strong> ₹6,254</li>
+            <li><strong>Full Module Exam Fee (all modules):</strong> ₹25,016</li>
+        </ul>
+        <p>This fee is applicable for each module or the full set of modules, and must be paid at the exam center.</p>
+
+        <h3>🤝 Our Commitment to You</h3>
+        <p>At Deutsch Zeit, we are committed to trust, transparency, and professionalism. We strive to maintain a respectful, honest, and seamless experience for all our candidates. Let's work together to ensure success!</p>
+    </div>
+</div>
+
 <script>
-async function check() {
+let termsOpened = false;
+
+function openTerms() {
+    termsOpened = true;
+    document.getElementById('termsModal').style.display = 'block';
+    // Hide warning once terms are opened
+    document.getElementById('termsWarning').classList.remove('show');
+}
+
+function closeTerms() {
+    document.getElementById('termsModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('termsModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
     const email = document.getElementById("email").value.trim();
+    const termsAccepted = document.getElementById("termsCheckbox").checked;
     const result = document.getElementById("result");
     const spinner = document.getElementById("spinner");
     const checkBtn = document.getElementById("checkBtn");
+
+    // Validation
+    if (!name) {
+        result.innerHTML = "⚠️ Please enter your full name";
+        result.className = "notfound show";
+        setTimeout(() => result.classList.remove("show"), 3000);
+        return;
+    }
+
+    if (!phone) {
+        result.innerHTML = "⚠️ Please enter your phone number";
+        result.className = "notfound show";
+        setTimeout(() => result.classList.remove("show"), 3000);
+        return;
+    }
+
+    // Phone validation (10 digits for Indian numbers)
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+        result.innerHTML = "⚠️ Please enter a valid 10-digit phone number";
+        result.className = "notfound show";
+        setTimeout(() => result.classList.remove("show"), 3000);
+        return;
+    }
 
     if (!email) {
         result.innerHTML = "⚠️ Please enter your email address";
@@ -198,6 +458,22 @@ async function check() {
         return;
     }
 
+    // Check if terms were opened
+    if (!termsOpened) {
+        result.innerHTML = "⚠️ You must read the Terms and Conditions before accepting them. Please click on 'Terms and Conditions' to read them.";
+        result.className = "notfound show";
+        document.getElementById('termsWarning').classList.add('show');
+        setTimeout(() => result.classList.remove("show"), 5000);
+        return;
+    }
+
+    if (!termsAccepted) {
+        result.innerHTML = "⚠️ Please accept the Terms and Conditions to continue";
+        result.className = "notfound show";
+        setTimeout(() => result.classList.remove("show"), 3000);
+        return;
+    }
+
     // Reset and show loading
     result.classList.remove("show");
     spinner.classList.add("show");
@@ -208,7 +484,12 @@ async function check() {
         const res = await fetch("/check_email", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email })
+            body: JSON.stringify({
+                name: name,
+                phone: phone,
+                email: email,
+                terms_accepted: termsAccepted
+            })
         });
 
         const data = await res.json();
@@ -216,7 +497,7 @@ async function check() {
 
         setTimeout(() => {
             if (!data.found) {
-                result.innerHTML = "✅ Email Verified Successfully!<br><small>Redirecting to module selection...</small>";
+                result.innerHTML = "✅ Registration Verified Successfully!<br><small>Redirecting to module selection...</small>";
                 result.className = "found show";
 
                 // Redirect to module selection after 1.5 seconds
@@ -224,10 +505,10 @@ async function check() {
                     window.location.href = "/module";
                 }, 1500);
             } else {
-                result.innerHTML = "❌ Email Already registed with us<br><small>Please check your email or contact support +91 7034942438</small>";
+                result.innerHTML = "❌ Email Already registered with us<br><small>Please check your email or contact support +91 7034942438</small>";
                 result.className = "notfound show";
                 checkBtn.disabled = false;
-                checkBtn.textContent = "Verify Email";
+                checkBtn.textContent = "Continue to Registration";
             }
         }, 300);
     } catch (error) {
@@ -235,14 +516,7 @@ async function check() {
         result.innerHTML = "⚠️ Error occurred. Please try again.";
         result.className = "notfound show";
         checkBtn.disabled = false;
-        checkBtn.textContent = "Verify Email";
-    }
-}
-
-// Allow Enter key to submit
-document.getElementById("email").addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        check();
+        checkBtn.textContent = "Continue to Registration";
     }
 });
 </script>
