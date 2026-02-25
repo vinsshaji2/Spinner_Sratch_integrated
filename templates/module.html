@@ -135,18 +135,55 @@
             }
         }
 
-        @media (max-width: 480px) {
-            .card {
-                padding: 30px 20px;
-            }
+        .custom-module-wrapper {
+            margin-top: 20px;
+            text-align: left;
+        }
 
-            .card h1 {
-                font-size: 24px;
-            }
+        .custom-module-label {
+            color: #ddd;
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: block;
+        }
 
-            .module-options {
-                grid-template-columns: 1fr;
-            }
+        .custom-module-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .custom-module-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .custom-module-input:focus {
+            border-color: gold;
+            background: rgba(255, 215, 0, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.15);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0 5px;
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+            gap: 10px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-top: 1px solid rgba(255,255,255,0.2);
         }
     </style>
 </head>
@@ -180,6 +217,18 @@
             </div>
         </div>
 
+        <div class="divider">or type your module</div>
+        <div class="custom-module-wrapper">
+            <label class="custom-module-label">📝 Enter a custom module or combination</label>
+            <input
+                type="text"
+                id="customModuleInput"
+                class="custom-module-input"
+                placeholder="e.g. Sprechen + Schreiben, B2 Exam, etc."
+                oninput="handleCustomInput(this.value)"
+            />
+        </div>
+
         <button type="submit" id="continueBtn" disabled>Continue to Offers</button>
     </form>
 </div>
@@ -189,30 +238,43 @@ let selectedModules = [];
 
 function selectModule(module, event) {
     const button = event.currentTarget;
-
-    // Toggle visual selection
     button.classList.toggle('selected');
 
     if (selectedModules.includes(module)) {
-        // Remove module if already selected
         selectedModules = selectedModules.filter(m => m !== module);
     } else {
-        // Add module
         selectedModules.push(module);
     }
 
-    // Update hidden input (comma-separated)
-    document.getElementById('moduleInput').value = selectedModules.join(',');
+    updateModuleInput();
+}
 
-    // Enable/Disable continue button
+function handleCustomInput(value) {
+    // If user types in custom field, clear button selections
+    if (value.trim()) {
+        // Deselect all buttons
+        document.querySelectorAll('.module-btn').forEach(btn => btn.classList.remove('selected'));
+        selectedModules = [];
+        document.getElementById('moduleInput').value = value.trim();
+        document.getElementById('continueBtn').disabled = false;
+    } else {
+        updateModuleInput();
+    }
+}
+
+function updateModuleInput() {
+    // Clear custom input if buttons are being used
+    document.getElementById('customModuleInput').value = '';
+    document.getElementById('moduleInput').value = selectedModules.join(',');
     document.getElementById('continueBtn').disabled = selectedModules.length === 0;
 }
 
 // Form validation
 document.getElementById('moduleForm').addEventListener('submit', function(e) {
-    if (selectedModules.length === 0) {
+    const moduleVal = document.getElementById('moduleInput').value;
+    if (!moduleVal) {
         e.preventDefault();
-        alert('Please select at least one module!');
+        alert('Please select or type at least one module!');
     }
 });
 </script>

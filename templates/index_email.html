@@ -294,6 +294,54 @@
             display: block;
         }
 
+        /* Auto-popup overlay for terms */
+        .terms-auto-modal {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .terms-auto-modal .modal-content {
+            position: relative;
+        }
+
+        .terms-auto-close-btn {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .terms-auto-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .terms-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 30px 20px;
@@ -337,10 +385,11 @@
                 <input type="checkbox" id="termsCheckbox" required />
                 <label for="termsCheckbox" class="checkbox-label">
                     I have read and agree to the <span class="terms-link" onclick="openTerms()">Terms and Conditions</span> <span class="required">*</span>
+                    <span class="terms-badge" id="termsBadge" style="display:none;">✓ Read</span>
                 </label>
             </div>
             <div class="warning-text" id="termsWarning">
-                ⚠️ Please click on "Terms and Conditions" above to read them before accepting.
+                ⚠️ Please accept the Terms and Conditions to continue.
             </div>
         </div>
 
@@ -351,7 +400,7 @@
     <div id="result"></div>
 </div>
 
-<!-- Terms Modal -->
+<!-- Terms Modal (manual open) -->
 <div id="termsModal" class="modal">
     <div class="modal-content">
         <span class="close" onclick="closeTerms()">&times;</span>
@@ -385,13 +434,48 @@
     </div>
 </div>
 
+<!-- Auto Terms Popup (shown after form fill) -->
+<div id="termsAutoModal" class="terms-auto-modal">
+    <div class="modal-content">
+        <h2>📌 Please Read: Terms and Conditions</h2>
+
+        <h3>Cancellation Policy</h3>
+        <p>Once your email is registered and your seat is reserved, <strong>cancellations will not be accepted</strong>. On the day of registration, an official email will be sent to Goethe from our team.</p>
+        <p>⚠️ Please only submit the form if you are genuinely interested in appearing for the exam. Make sure you have fully decided before submitting to ensure a smooth process for all candidates.</p>
+
+        <h3>Payment Policy</h3>
+        <p>💳 Payment to Deutsch Zeit is required once you receive the confirmation email, even if you later decide not to attend the exam.</p>
+        <p>✅ No advance payment is needed. You are required to pay <strong>₹1500/₹2000</strong> (for different modules or Sprechen combos) only after receiving your official confirmation email.</p>
+
+        <h3>Account & Registration Policy</h3>
+        <p>By registering through Deutsch Zeit, you agree and confirm that:</p>
+        <ul>
+            <li>You have no objection to sharing your email credentials (email ID and password) with Deutsch Zeit solely for the purpose of exam registration with the Goethe-Institut.</li>
+            <li>You understand and acknowledge that Deutsch Zeit handles the registration process responsibly and maintains strict confidentiality regarding your shared information.</li>
+            <li>You are fully aware of the ₹1500/2000 Deutsch Zeit service fee and have no concerns regarding this payment. You understand that this amount is paid solely for the service provided by Deutsch Zeit.</li>
+        </ul>
+
+        <h3>Exam Fee Structure:</h3>
+        <ul>
+            <li><strong>Per Module Exam Fee:</strong> ₹6,254</li>
+            <li><strong>Full Module Exam Fee (all modules):</strong> ₹25,016</li>
+        </ul>
+        <p>This fee is applicable for each module or the full set of modules, and must be paid at the exam center.</p>
+
+        <h3>🤝 Our Commitment to You</h3>
+        <p>At Deutsch Zeit, we are committed to trust, transparency, and professionalism. We strive to maintain a respectful, honest, and seamless experience for all our candidates. Let's work together to ensure success!</p>
+
+        <button class="terms-auto-close-btn" onclick="acceptAndCloseTerms()">✅ I Have Read & Accept the Terms</button>
+    </div>
+</div>
+
 <script>
 let termsOpened = false;
+let termsAutoShown = false;
 
 function openTerms() {
     termsOpened = true;
     document.getElementById('termsModal').style.display = 'block';
-    // Hide warning once terms are opened
     document.getElementById('termsWarning').classList.remove('show');
 }
 
@@ -399,13 +483,48 @@ function closeTerms() {
     document.getElementById('termsModal').style.display = 'none';
 }
 
-// Close modal when clicking outside
+// Auto-accept when user closes the auto popup
+function acceptAndCloseTerms() {
+    termsOpened = true;
+    document.getElementById('termsAutoModal').style.display = 'none';
+    // Auto-tick the checkbox
+    const cb = document.getElementById('termsCheckbox');
+    cb.checked = true;
+    document.getElementById('termsBadge').style.display = 'inline-block';
+    document.getElementById('termsWarning').classList.remove('show');
+}
+
+// Close modal when clicking outside (manual modal)
 window.onclick = function(event) {
     const modal = document.getElementById('termsModal');
     if (event.target == modal) {
         modal.style.display = 'none';
     }
+    // Auto modal: clicking outside also accepts
+    const autoModal = document.getElementById('termsAutoModal');
+    if (event.target == autoModal) {
+        acceptAndCloseTerms();
+    }
 }
+
+// Watch all 3 fields — show T&C auto popup once all are filled
+function checkFieldsAndShowTerms() {
+    if (termsAutoShown) return;
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+
+    if (name && phoneRegex.test(phone) && emailRegex.test(email)) {
+        termsAutoShown = true;
+        document.getElementById('termsAutoModal').style.display = 'block';
+    }
+}
+
+document.getElementById('name').addEventListener('blur', checkFieldsAndShowTerms);
+document.getElementById('phone').addEventListener('blur', checkFieldsAndShowTerms);
+document.getElementById('email').addEventListener('blur', checkFieldsAndShowTerms);
 
 document.getElementById('registrationForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -433,7 +552,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         return;
     }
 
-    // Phone validation (10 digits for Indian numbers)
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(phone)) {
         result.innerHTML = "⚠️ Please enter a valid 10-digit phone number";
@@ -449,7 +567,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         return;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         result.innerHTML = "⚠️ Please enter a valid email address";
@@ -458,19 +575,10 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
         return;
     }
 
-    // Check if terms were opened
-    if (!termsOpened) {
-        result.innerHTML = "⚠️ You must read the Terms and Conditions before accepting them. Please click on 'Terms and Conditions' to read them.";
-        result.className = "notfound show";
-        document.getElementById('termsWarning').classList.add('show');
-        setTimeout(() => result.classList.remove("show"), 5000);
-        return;
-    }
-
+    // If terms not yet shown/accepted, show the auto popup now
     if (!termsAccepted) {
-        result.innerHTML = "⚠️ Please accept the Terms and Conditions to continue";
-        result.className = "notfound show";
-        setTimeout(() => result.classList.remove("show"), 3000);
+        document.getElementById('termsAutoModal').style.display = 'block';
+        document.getElementById('termsWarning').classList.add('show');
         return;
     }
 
@@ -500,7 +608,6 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
                 result.innerHTML = "✅ Registration Verified Successfully!<br><small>Redirecting to module selection...</small>";
                 result.className = "found show";
 
-                // Redirect to module selection after 1.5 seconds
                 setTimeout(() => {
                     window.location.href = "/module";
                 }, 1500);
