@@ -20,7 +20,7 @@ try:
     client = gspread.authorize(creds)
 
     # TODO: Update this with your Google Sheet ID
-    SHEET_ID = "1hpkKB_wtU38MXC-eXWOCg0J9CSBaxuOvJnPAqEpMdzQ"
+    SHEET_ID = "11DoRZQ_wQSOYBXQAGsl3UkOxxrnx3Y9FbZxR3o-0IoZ8"
     spreadsheet = client.open_by_key(SHEET_ID)
     print(f"Successfully connected to Google Sheet: {spreadsheet.title}")
 except FileNotFoundError:
