@@ -95,6 +95,7 @@ canvas.addEventListener("touchend", (e) => {
 
 function startScratching(e) {
     isScratching = true;
+    sessionStorage.setItem("hasSpun", "true");
 }
 
 function stopScratching(e) {

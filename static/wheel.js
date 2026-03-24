@@ -14,6 +14,7 @@ let userEmail = "";
 let userName = "";
 let userPhone = "";
 let lastWinText = "";
+let isScratching = false;
 
 // 🎨 Draw the wheel
 function drawWheel() {
@@ -193,6 +194,7 @@ function showWinPopup(text) {
 
     // Save win in browser session
     sessionStorage.setItem("hasSpun", "true");
+    isScratching = true;
     sessionStorage.setItem("hasScratched", "true");
     sessionStorage.setItem("scratchReward", text);
     sessionStorage.setItem("winText", text);
