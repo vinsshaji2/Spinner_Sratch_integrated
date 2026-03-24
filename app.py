@@ -1,7 +1,7 @@
 from flask import Flask, render_template, jsonify, request, redirect, session
 import random
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "super_secret_key_123"  # Change this to a random secure key
@@ -15,12 +15,12 @@ scope = [
 ]
 
 try:
-    creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+    creds = Credentials.from_service_account_file("service_account.json", scopes=scope)
     print(f"Service Account Email: {creds.service_account_email}")
     client = gspread.authorize(creds)
 
     # TODO: Update this with your Google Sheet ID
-    SHEET_ID = "11DoRZQ_wQSOYBXQAGsl3UkOxxrnx3Y9FbZxR3o-0IoZ8"
+    SHEET_ID = "1DoRZQ_wQSOYBXQAGsl3UkOxxrnx3Y9FbZxR3o-0IoZ8"
     spreadsheet = client.open_by_key(SHEET_ID)
     print(f"Successfully connected to Google Sheet: {spreadsheet.title}")
 except FileNotFoundError:
@@ -28,7 +28,9 @@ except FileNotFoundError:
     print("Please add your Google Sheets service account credentials file.")
     spreadsheet = None
 except Exception as e:
+    import traceback
     print(f"ERROR connecting to Google Sheets: {e}")
+    traceback.print_exc()
     spreadsheet = None
 
 
